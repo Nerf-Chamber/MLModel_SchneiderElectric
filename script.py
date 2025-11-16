@@ -95,6 +95,16 @@ def testML():
     plt.close()
     print("Saved: shap_local_case.png")
 
+    instance_index = 0
+    instance = X_test.iloc[instance_index:instance_index + 1]
+    shap_values_local = explainer.shap_values(instance)
+
+    explicacions = interpretar_shap_local(shap_values_local, instance, X.columns)
+
+    print("\n=== Explicació automàtica SHAP ===")
+    for frase in explicacions:
+        print("•", frase)
+
     # ============================================================
     #                     LIME EXPLAINABILITY
     # ============================================================
@@ -149,6 +159,19 @@ def testML():
     input_df.to_csv(output_name, index=False)
     print(f"\nPredictions saved to: {output_name}")
 
+def interpretar_shap_local(shap_values, instance, feature_names, threshold=0.05):
+    explicacions = []
+
+    for i, valor in enumerate(shap_values[0]):
+        nom = feature_names[i]
+        direccio = "incrementa" if valor > 0 else "redueix"
+        intensitat = abs(valor)
+
+        if intensitat >= threshold:
+            frase = f"La característica '{nom}' {direccio} la probabilitat de guanyar amb un impacte de {valor:.3f}."
+            explicacions.append(frase)
+
+    return explicacions
 
 if __name__ == "__main__":
     testML()
